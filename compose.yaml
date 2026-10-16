@@ -1,0 +1,33 @@
+name: vibyroom-frontend
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: vibyroom-frontend:local
+
+    restart: unless-stopped
+
+    environment:
+      BACKEND_UPSTREAM: "${BACKEND_UPSTREAM:?BACKEND_UPSTREAM is required}"
+
+    ports:
+      - "127.0.0.1:${FRONTEND_HOST_PORT:-8085}:8080"
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    networks:
+      edge:
+        aliases:
+          - vibyroom-frontend
+
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  edge:
+    external: true
+    name: vibyroom-edge
