@@ -794,7 +794,7 @@
    Final player layout
    ====================================== */
 
-/* Обе панели занимают одинаковую высоту */
+/* Обе панели одинаковой высоты */
 .room-layout-ai .room-top-row {
     align-items: stretch;
 }
@@ -805,20 +805,20 @@
     align-self: stretch;
 }
 
-/* Плеер заполняет высоту AI DJ */
+/* Содержимое плеера всегда сверху */
 .room-layout-ai .room-top-row > .music-player {
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
 }
 
-/* Обложка, прогресс и кнопки
-   располагаются по центру оставшегося места */
+/* Не растягиваем содержимое на всю высоту */
 .room-layout-ai .room-top-row .music-player-body {
-    flex: 1;
-    align-items: center;
+    flex: 0 0 auto;
+    align-items: start;
 }
 
-/* Убираем вертикальный разделитель кнопок */
+/* Без разделителя между кнопками */
 .room-layout-ai .music-controls-divider {
     display: none;
 }
