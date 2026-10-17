@@ -32,12 +32,16 @@ interface MusicRuntime {
     refresh(): Promise<void>
     onMusicStateChanged(state: RoomMusicState): void
     onQueueChanged(event: QueueChangedEvent): void
+
     startListening(): void
     stopListening(): void
+    toggleMute(): void
     retryAudio(): void
+
     playPause(): Promise<void>
     skip(): Promise<void>
     seek(positionMs: number): Promise<void>
+
     addTrack(reference: TrackReference): Promise<void>
     removeTrack(itemId: string): Promise<void>
     moveTrack(itemId: string, position: number): Promise<void>
@@ -49,6 +53,7 @@ const initialAudio: LocalAudioState = {
     positionSeconds: 0,
     durationSeconds: null,
     error: null,
+    muted: false,
 }
 
 function isAbortError(error: unknown): boolean {
@@ -79,14 +84,17 @@ export function useRoomMusic(roomId: string) {
     const [listening, setListening] = useState(false)
     const [musicBusy, setMusicBusy] = useState(false)
     const [musicLoading, setMusicLoading] = useState(true)
+
     const [musicError, setMusicError] =
         useState<string | null>(null)
+
     const [positionMs, setPositionMs] = useState(0)
 
     const [searchResults, setSearchResults] =
         useState<MusicTrack[]>([])
 
     const [searchBusy, setSearchBusy] = useState(false)
+
     const [searchError, setSearchError] =
         useState<string | null>(null)
 
@@ -145,11 +153,7 @@ export function useRoomMusic(roomId: string) {
             }
 
             const delay = retryDelayMs
-
-            retryDelayMs = Math.min(
-                retryDelayMs * 2,
-                30000,
-            )
+            retryDelayMs = Math.min(retryDelayMs * 2, 30000)
 
             retryTimer = window.setTimeout(() => {
                 retryTimer = null
@@ -200,7 +204,7 @@ export function useRoomMusic(roomId: string) {
                 state.queue[0]?.track.reference ?? null
 
             void sync.preloadNext(next).catch(() => {
-                // Ошибка предзагрузки не останавливает музыку.
+                // Неудачная предзагрузка не останавливает плеер.
             })
         }
 
@@ -216,8 +220,6 @@ export function useRoomMusic(roomId: string) {
             const result = store.applyRestSnapshot(state)
 
             if (result === 'stale') {
-                // Realtime мог доставить более новую версию,
-                // пока REST-запрос был в пути.
                 return
             }
 
@@ -438,8 +440,7 @@ export function useRoomMusic(roomId: string) {
             setMusicError(null)
             setListening(true)
 
-            // HTMLAudioElement.play() вызывается
-            // непосредственно из пользовательского клика.
+            // play() остаётся вызовом из пользовательского клика.
             void sync.startListening().catch(
                 (error: unknown) => {
                     if (!alive) {
@@ -459,6 +460,15 @@ export function useRoomMusic(roomId: string) {
             if (alive) {
                 setListening(false)
             }
+        }
+
+        function toggleMute(): void {
+            if (!alive) {
+                return
+            }
+
+            const muted = player.getState().muted
+            player.setMuted(!muted)
         }
 
         function retryAudio(): void {
@@ -651,12 +661,16 @@ export function useRoomMusic(roomId: string) {
             refresh,
             onMusicStateChanged,
             onQueueChanged,
+
             startListening,
             stopListening,
+            toggleMute,
             retryAudio,
+
             playPause,
             skip,
             seek,
+
             addTrack,
             removeTrack,
             moveTrack,
@@ -755,6 +769,10 @@ export function useRoomMusic(roomId: string) {
         runtimeRef.current?.stopListening()
     }, [])
 
+    const toggleMute = useCallback(() => {
+        runtimeRef.current?.toggleMute()
+    }, [])
+
     const retryAudio = useCallback(() => {
         runtimeRef.current?.retryAudio()
     }, [])
@@ -826,12 +844,16 @@ export function useRoomMusic(roomId: string) {
         refreshMusic,
         onMusicStateChanged,
         onQueueChanged,
+
         startListening,
         stopListening,
+        toggleMute,
         retryAudio,
+
         playPause,
         skip,
         seek,
+
         addTrack,
         removeTrack,
         moveTrack,
