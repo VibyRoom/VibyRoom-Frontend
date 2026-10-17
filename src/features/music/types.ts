@@ -1,4 +1,3 @@
-
 export interface TrackReference {
     provider: string
     trackId: string
@@ -84,3 +83,8 @@ export type MusicStateApplyResult =
     | 'unchanged'
     | 'stale'
     | 'gap'
+
+export interface AiSessionResponse {
+    prompt: string | null
+    canGenerateMore: boolean
+}

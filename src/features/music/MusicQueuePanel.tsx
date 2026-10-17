@@ -12,6 +12,48 @@ interface MusicQueuePanelProps {
     isOwner: boolean
 }
 
+interface TrackArtworkProps {
+    artworkUrl: string | null
+    className?: string
+}
+
+function TrackArtwork({
+                          artworkUrl,
+                          className = '',
+                      }: TrackArtworkProps) {
+    const [failedUrl, setFailedUrl] =
+        useState<string | null>(null)
+
+    const url = artworkUrl?.trim() ?? ''
+
+    const canDisplayImage =
+        url.length > 0 &&
+        failedUrl !== url
+
+    return (
+        <span
+            className={`music-track-artwork ${className}`}
+            aria-hidden="true"
+        >
+            {canDisplayImage ? (
+                <img
+                    key={url}
+                    src={url}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    referrerPolicy="no-referrer"
+                    onError={() => setFailedUrl(url)}
+                />
+            ) : (
+                <span className="music-track-artwork-fallback">
+                    ♫
+                </span>
+            )}
+        </span>
+    )
+}
+
 function formatDuration(durationMs: number | null): string {
     if (durationMs === null || durationMs <= 0) {
         return '—'
@@ -51,37 +93,45 @@ export function MusicQueuePanel({
         >
             <div className="panel-heading queue-heading">
                 <div className="queue-title-group">
-          <span className="queue-symbol" aria-hidden="true">
-            ≡
-          </span>
+                    <span
+                        className="queue-symbol"
+                        aria-hidden="true"
+                    >
+                        ≡
+                    </span>
 
-                    <h2 id="queue-title">Музыкальная очередь</h2>
+                    <h2 id="queue-title">
+                        Музыкальная очередь
+                    </h2>
 
                     <span className="counter">
-            {items.length}
-          </span>
+                        {items.length}
+                    </span>
                 </div>
 
                 <span className="music-queue-version">
-          {music.musicState
-              ? `Версия ${music.musicState.version}`
-              : 'Загрузка'}
-        </span>
+                    {music.musicState
+                        ? `Версия ${music.musicState.version}`
+                        : 'Загрузка'}
+                </span>
             </div>
 
             <div className="music-queue-content">
                 {music.musicLoading && !music.musicState ? (
-                    <p className="music-queue-message" role="status">
+                    <p
+                        className="music-queue-message"
+                        role="status"
+                    >
                         Загружаем музыкальное состояние…
                     </p>
                 ) : items.length === 0 ? (
                     <div className="queue-empty">
-            <span
-                className="queue-empty-icon"
-                aria-hidden="true"
-            >
-              ♬
-            </span>
+                        <span
+                            className="queue-empty-icon"
+                            aria-hidden="true"
+                        >
+                            ♬
+                        </span>
 
                         <h3>Очередь пока пуста</h3>
 
@@ -96,7 +146,8 @@ export function MusicQueuePanel({
                             const addedBy =
                                 members.find(
                                     (member) =>
-                                        member.guestId === item.addedByGuestId,
+                                        member.guestId ===
+                                        item.addedByGuestId,
                                 )?.displayName ?? 'Гость'
 
                             const canRemove =
@@ -108,12 +159,21 @@ export function MusicQueuePanel({
                                     key={item.id}
                                     className="music-queue-item"
                                 >
-                  <span className="music-queue-number">
-                    {index + 1}
-                  </span>
+                                    <span className="music-queue-number">
+                                        {index + 1}
+                                    </span>
+
+                                    <TrackArtwork
+                                        artworkUrl={
+                                            item.track.artworkUrl
+                                        }
+                                        className="music-queue-artwork"
+                                    />
 
                                     <div className="music-queue-track">
-                                        <strong>{item.track.title}</strong>
+                                        <strong>
+                                            {item.track.title}
+                                        </strong>
 
                                         <small>
                                             {item.track.artists.join(', ')}
@@ -123,8 +183,10 @@ export function MusicQueuePanel({
                                     </div>
 
                                     <span className="music-queue-duration">
-                    {formatDuration(item.track.durationMs)}
-                  </span>
+                                        {formatDuration(
+                                            item.track.durationMs,
+                                        )}
+                                    </span>
 
                                     <div className="music-queue-actions">
                                         {isOwner && (
@@ -157,7 +219,8 @@ export function MusicQueuePanel({
                                                     }
                                                     disabled={
                                                         music.musicBusy ||
-                                                        index === items.length - 1
+                                                        index ===
+                                                        items.length - 1
                                                     }
                                                     onClick={() => {
                                                         void music.moveTrack(
@@ -181,7 +244,9 @@ export function MusicQueuePanel({
                                                 }
                                                 disabled={music.musicBusy}
                                                 onClick={() => {
-                                                    void music.removeTrack(item.id)
+                                                    void music.removeTrack(
+                                                        item.id,
+                                                    )
                                                 }}
                                             >
                                                 ×
@@ -235,13 +300,19 @@ export function MusicQueuePanel({
                     </form>
 
                     {music.searchError && (
-                        <p className="room-error" role="alert">
+                        <p
+                            className="room-error"
+                            role="alert"
+                        >
                             {music.searchError}
                         </p>
                     )}
 
                     {music.musicError && (
-                        <p className="room-error" role="alert">
+                        <p
+                            className="room-error"
+                            role="alert"
+                        >
                             {music.musicError}
                         </p>
                     )}
@@ -256,28 +327,22 @@ export function MusicQueuePanel({
                                     }
                                     className="music-search-result"
                                 >
-                                    {track.artworkUrl ? (
-                                        <img
-                                            src={track.artworkUrl}
-                                            alt=""
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <span
-                                            className="music-search-artwork-empty"
-                                            aria-hidden="true"
-                                        >
-                      ♫
-                    </span>
-                                    )}
+                                    <TrackArtwork
+                                        artworkUrl={track.artworkUrl}
+                                        className="music-search-artwork"
+                                    />
 
                                     <div className="music-search-track">
-                                        <strong>{track.title}</strong>
+                                        <strong>
+                                            {track.title}
+                                        </strong>
 
                                         <small>
                                             {track.artists.join(', ')}
                                             {' · '}
-                                            {formatDuration(track.durationMs)}
+                                            {formatDuration(
+                                                track.durationMs,
+                                            )}
                                         </small>
                                     </div>
 
@@ -289,7 +354,9 @@ export function MusicQueuePanel({
                                             track.durationMs <= 0
                                         }
                                         onClick={() => {
-                                            void music.addTrack(track.reference)
+                                            void music.addTrack(
+                                                track.reference,
+                                            )
                                         }}
                                     >
                                         Добавить

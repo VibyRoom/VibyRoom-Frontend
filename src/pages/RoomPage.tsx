@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { VibyBrand } from '../components/VibyBrand'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { InviteQrButton } from '../components/InviteQrButton'
 
 import {
     createOrContinueGuestSession,
@@ -14,11 +15,15 @@ import {
 } from '../features/presence/roomRealtime'
 
 import { roomsApi } from '../features/rooms/roomsApi'
-import type { RoomDetails, RoomMember } from '../features/rooms/types'
+import type {
+    RoomDetails,
+    RoomMember,
+} from '../features/rooms/types'
 
 import { useRoomMusic } from '../features/music/useRoomMusic'
 import { PlayerControls } from '../features/music/PlayerControls'
 import { MusicQueuePanel } from '../features/music/MusicQueuePanel'
+import { AiDjPanel } from '../features/music/AiDjPanel'
 
 import {
     ApiError,
@@ -60,8 +65,11 @@ export function RoomPage() {
         stopListening,
     } = music
 
-    const [room, setRoom] = useState<RoomDetails | null>(null)
-    const [guestId, setGuestId] = useState<string | null>(null)
+    const [room, setRoom] =
+        useState<RoomDetails | null>(null)
+
+    const [guestId, setGuestId] =
+        useState<string | null>(null)
 
     const [onlineGuests, setOnlineGuests] =
         useState<Set<string>>(new Set())
@@ -186,8 +194,6 @@ export function RoomPage() {
                 setRoom(details)
                 setLoading(false)
 
-                // REST сначала восстанавливает состояние,
-                // SignalR затем приносит изменения.
                 void refreshMusic()
 
                 realtime = new RoomRealtime(roomId, {
@@ -227,7 +233,6 @@ export function RoomPage() {
                         if (state !== 'connected') {
                             setOnlineGuests(new Set())
                         } else {
-                            // После reconnect REST обязателен.
                             void refreshMusic()
                             void reloadRoom()
                         }
@@ -290,7 +295,10 @@ export function RoomPage() {
         action: () => Promise<void>,
         refreshRoom = false,
     ): Promise<boolean> {
-        if (operationInProgress.current || terminalState) {
+        if (
+            operationInProgress.current ||
+            terminalState
+        ) {
             return false
         }
 
@@ -397,7 +405,7 @@ export function RoomPage() {
         setLoading(true)
         setConnectionState('connecting')
         setError('')
-        setRetryVersion((version) => version + 1)
+        setRetryVersion((value) => value + 1)
     }
 
     if (terminalState) {
@@ -424,6 +432,7 @@ export function RoomPage() {
             <main className="page narrow">
                 <div className="panel stack terminal-panel">
                     <span className="eyebrow">VibyRoom</span>
+
                     <h1>{message.title}</h1>
 
                     <p className="muted-text">
@@ -541,17 +550,17 @@ export function RoomPage() {
                         </strong>
 
                         <span>
-              Совместная музыкальная комната
-            </span>
+                            Совместная музыкальная комната
+                        </span>
                     </div>
                 </div>
 
                 <div className="header-invitation">
                     <div className="header-copy-block">
                         <div className="copy-content">
-              <span className="field-caption">
-                Код приглашения
-              </span>
+                            <span className="field-caption">
+                                Код приглашения
+                            </span>
 
                             <code title={room.inviteCode}>
                                 {room.inviteCode}
@@ -572,16 +581,16 @@ export function RoomPage() {
 
                     <div className="header-copy-block invite-link-block">
                         <div className="copy-content">
-              <span className="field-caption">
-                Ссылка приглашения
-              </span>
+                            <span className="field-caption">
+                                Ссылка приглашения
+                            </span>
 
                             <span
                                 className="copy-value"
                                 title={invitationUrl}
                             >
-                {invitationUrl}
-              </span>
+                                {invitationUrl}
+                            </span>
                         </div>
 
                         <button
@@ -598,9 +607,9 @@ export function RoomPage() {
                 </div>
 
                 <div className="header-user-actions">
-          <span className="header-role">
-            {isOwner ? 'Ведущий' : 'Участник'}
-          </span>
+                    <span className="header-role">
+                        {isOwner ? 'Ведущий' : 'Участник'}
+                    </span>
 
                     <button
                         type="button"
@@ -613,7 +622,7 @@ export function RoomPage() {
                 </div>
             </header>
 
-            <div className="room-layout">
+            <div className="room-layout room-layout-ai">
                 <aside
                     className="panel participants-panel"
                     aria-label="Участники комнаты"
@@ -623,33 +632,36 @@ export function RoomPage() {
                             <h2>Участники</h2>
 
                             <span className="counter">
-                {room.members.length}
-              </span>
+                                {room.members.length}
+                            </span>
                         </div>
 
                         <span className="capacity-text">
-              / {room.capacity}
-            </span>
+                            / {room.capacity}
+                        </span>
                     </div>
 
                     <div className="presence-summary">
-            <span
-                className={
-                    `status-dot ${connected ? 'online' : ''}`
-                }
-                aria-hidden="true"
-            />
+                        <span
+                            className={
+                                `status-dot ${
+                                    connected ? 'online' : ''
+                                }`
+                            }
+                            aria-hidden="true"
+                        />
 
                         <span>
-              {onlineCount === null
-                  ? 'Статус неизвестен'
-                  : `${onlineCount} онлайн`}
-            </span>
+                            {onlineCount === null
+                                ? 'Статус неизвестен'
+                                : `${onlineCount} онлайн`}
+                        </span>
                     </div>
 
                     <ul className="participants-list">
                         {room.members.map((member) => {
-                            const isMe = member.guestId === guestId
+                            const isMe =
+                                member.guestId === guestId
 
                             const isOnline =
                                 connected &&
@@ -661,12 +673,16 @@ export function RoomPage() {
                                     className="participant"
                                 >
                                     <div className="participant-top">
-                    <span
-                        className={
-                            `status-dot ${isOnline ? 'online' : ''}`
-                        }
-                        aria-hidden="true"
-                    />
+                                        <span
+                                            className={
+                                                `status-dot ${
+                                                    isOnline
+                                                        ? 'online'
+                                                        : ''
+                                                }`
+                                            }
+                                            aria-hidden="true"
+                                        />
 
                                         <div className="participant-info">
                                             <div className="participant-name-line">
@@ -676,14 +692,14 @@ export function RoomPage() {
 
                                                 {member.role === 'owner' && (
                                                     <span className="owner-tag">
-                            Ведущий
-                          </span>
+                                                        Ведущий
+                                                    </span>
                                                 )}
 
                                                 {isMe && (
                                                     <span className="you-tag">
-                            Вы
-                          </span>
+                                                        Вы
+                                                    </span>
                                                 )}
                                             </div>
 
@@ -748,67 +764,99 @@ export function RoomPage() {
                                 ? 'Ссылка скопирована'
                                 : 'Пригласить друзей'}
                         </button>
+
+                        <InviteQrButton
+                            invitationUrl={invitationUrl}
+                            roomName={room.name}
+                        />
                     </div>
                 </aside>
 
                 <main className="room-main">
-                    <div className="room-notices">
-                        <div
-                            className="connection-indicator"
-                            role="status"
-                        >
-              <span
-                  className={
-                      `status-dot ${connected ? 'online' : ''}`
-                  }
-                  aria-hidden="true"
-              />
-
-                            <span>
-                {connectionLabels[connectionState]}
-              </span>
-
-                            {connectionState === 'disconnected' && (
-                                <button
-                                    type="button"
-                                    className="text-action"
-                                    disabled={busy}
-                                    onClick={retryConnection}
+                    {(connectionState !== 'connected' || error) && (
+                        <div className="room-notices">
+                            {connectionState !== 'connected' && (
+                                <div
+                                    className="connection-indicator"
+                                    role="status"
                                 >
-                                    Подключиться снова
-                                </button>
+                                    <span
+                                        className="status-dot"
+                                        aria-hidden="true"
+                                    />
+
+                                    <span>
+                                        {connectionLabels[connectionState]}
+                                    </span>
+
+                                    {connectionState === 'disconnected' && (
+                                        <button
+                                            type="button"
+                                            className="text-action"
+                                            disabled={busy}
+                                            onClick={retryConnection}
+                                        >
+                                            Подключиться снова
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {error && (
+                                <div
+                                    className="room-error"
+                                    role="alert"
+                                >
+                                    {error}
+                                </div>
                             )}
                         </div>
+                    )}
 
-                        {error && (
-                            <div className="room-error" role="alert">
-                                {error}
-                            </div>
+                    <div
+                        className={
+                            `room-top-row ${
+                                isOwner
+                                    ? 'room-top-row--with-ai'
+                                    : ''
+                            }`
+                        }
+                    >
+                        <PlayerControls
+                            playback={
+                                music.musicState?.playback ?? null
+                            }
+                            pendingCount={
+                                music.musicState?.queue.length ?? 0
+                            }
+                            positionMs={music.positionMs}
+                            localAudio={music.localAudio}
+                            listening={music.listening}
+                            isOwner={isOwner}
+                            busy={music.musicBusy}
+                            error={music.musicError}
+                            onStartListening={music.startListening}
+                            onStopListening={music.stopListening}
+                            onToggleMute={music.toggleMute}
+                            onRetryAudio={music.retryAudio}
+                            onPlayPause={() => {
+                                void music.playPause()
+                            }}
+                            onSkip={() => {
+                                void music.skip()
+                            }}
+                            onSeek={(positionMs) => {
+                                void music.seek(positionMs)
+                            }}
+                        />
+
+                        {isOwner && (
+                            <AiDjPanel
+                                roomId={roomId}
+                                music={music}
+                            />
                         )}
                     </div>
-
-                    <PlayerControls
-                        playback={music.musicState?.playback ?? null}
-                        pendingCount={music.musicState?.queue.length ?? 0}
-                        positionMs={music.positionMs}
-                        localAudio={music.localAudio}
-                        listening={music.listening}
-                        isOwner={isOwner}
-                        busy={music.musicBusy}
-                        error={music.musicError}
-                        onStartListening={music.startListening}
-                        onStopListening={music.stopListening}
-                        onRetryAudio={music.retryAudio}
-                        onPlayPause={() => {
-                            void music.playPause()
-                        }}
-                        onSkip={() => {
-                            void music.skip()
-                        }}
-                        onSeek={(positionMs) => {
-                            void music.seek(positionMs)
-                        }}
-                    />
 
                     <MusicQueuePanel
                         music={music}
@@ -819,9 +867,9 @@ export function RoomPage() {
 
                     {isOwner && (
                         <div className="owner-settings">
-              <span className="muted-text">
-                Управление комнатой
-              </span>
+                            <span className="muted-text">
+                                Управление комнатой
+                            </span>
 
                             <button
                                 type="button"
