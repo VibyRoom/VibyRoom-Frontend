@@ -36,9 +36,17 @@ interface AiDjPanelProps {
 
 interface GenerationResult {
     tracks: QueueItem[]
+    action: AiAction
 }
 
 const batchSize = 15
+
+const actionTitles: Record<AiAction, string> = {
+    generate: 'Подборка по описанию',
+    more: 'Продолжение подборки',
+    random: 'Случайная подборка',
+    similar: 'Похожие композиции',
+}
 
 function errorForAction(error: unknown): string {
     if (
@@ -56,6 +64,42 @@ function errorForAction(error: unknown): string {
     }
 
     return getErrorMessage(error)
+}
+
+function AiGenerationAnimation() {
+    return (
+        <div
+            className="ai-dj-animation"
+            aria-hidden="true"
+        >
+            <div className="ai-dj-orbit">
+                <span className="ai-dj-orbit-ring ring-one" />
+                <span className="ai-dj-orbit-ring ring-two" />
+                <span className="ai-dj-orbit-ring ring-three" />
+
+                <span className="ai-dj-orbit-core">
+                    ♫
+                </span>
+
+                <span className="ai-dj-particle particle-one" />
+                <span className="ai-dj-particle particle-two" />
+                <span className="ai-dj-particle particle-three" />
+                <span className="ai-dj-particle particle-four" />
+                <span className="ai-dj-particle particle-five" />
+                <span className="ai-dj-particle particle-six" />
+            </div>
+
+            <div className="ai-dj-equalizer">
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+            </div>
+        </div>
+    )
 }
 
 export function AiDjPanel({
@@ -181,6 +225,8 @@ export function AiDjPanel({
         promptLength >= 3 &&
         promptLength <= 500
 
+    const generating = activeAction !== null
+
     async function run(action: AiAction): Promise<void> {
         if (
             requestInProgress.current ||
@@ -214,8 +260,6 @@ export function AiDjPanel({
             return
         }
 
-        // Защита срабатывает синхронно,
-        // до следующего React render.
         requestInProgress.current = true
 
         setActiveAction(action)
@@ -256,8 +300,6 @@ export function AiDjPanel({
                 return
             }
 
-            // Существующая версия-aware синхронизация:
-            // snapshot + REST, без изменений плеера.
             music.onMusicStateChanged(response)
             void music.refreshMusic()
 
@@ -275,9 +317,11 @@ export function AiDjPanel({
                         )
                         .slice(-batchSize)
 
-            setResult({ tracks })
+            setResult({
+                tracks,
+                action,
+            })
 
-            // Эти два режима сохраняют AI-контекст.
             if (
                 action === 'generate' ||
                 action === 'random'
@@ -291,8 +335,6 @@ export function AiDjPanel({
                 })
             }
 
-            // Для любого режима перечитываем
-            // реальный контекст с сервера.
             try {
                 const updatedContext =
                     await aiApi.getContext(roomId)
@@ -337,8 +379,7 @@ export function AiDjPanel({
                     void music.refreshMusic()
                 }
             } else {
-                // Только GET для проверки состояния.
-                // Никакого автоматического повтора POST.
+                // Не повторяем неидемпотентный POST.
                 void music.refreshMusic()
             }
         } finally {
@@ -360,14 +401,14 @@ export function AiDjPanel({
     function reloadContext(): void {
         setContextLoading(true)
         setContextError('')
-        setReloadVersion((value) => value + 1)
+        setReloadVersion((version) => version + 1)
     }
 
     return (
         <section
             className="panel ai-dj"
             aria-labelledby="ai-dj-title"
-            aria-busy={activeAction !== null}
+            aria-busy={generating}
         >
             <div className="ai-dj-heading">
                 <div>
@@ -375,19 +416,52 @@ export function AiDjPanel({
                         GIGACHAT × AUDIUS
                     </span>
 
-                    <h2 id="ai-dj-title">AI DJ</h2>
+                    <h2 id="ai-dj-title">
+                        AI DJ
+                    </h2>
                 </div>
 
                 <span className="ai-dj-owner">
-                    Управление владельца
+                    Только ведущий
                 </span>
             </div>
 
             <p className="ai-dj-description">
-                Опиши настроение или жанр — ИИ-диджей
-                добавит в общую очередь 15 подходящих
-                композиций. Новые подборки не заменяют старые.
+                Задай настроение, жанр или атмосферу.
+                AI DJ найдёт 15 композиций и добавит
+                их в общую очередь.
             </p>
+
+            <div
+                className={
+                    `ai-dj-generation ${
+                        generating ? 'is-active' : 'is-idle'
+                    }`
+                }
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+            >
+                <AiGenerationAnimation />
+
+                <strong>
+                    {generating
+                        ? 'ИИ-диджей подбирает музыку…'
+                        : 'AI DJ готов к подборке'}
+                </strong>
+
+                <p>
+                    {generating
+                        ? 'Ищем композиции через GigaChat и Audius.'
+                        : 'Твоя следующая музыкальная волна ждёт.'}
+                </p>
+
+                <span className="ai-dj-generation-note">
+                    {generating
+                        ? 'Это может занять некоторое время'
+                        : 'Выбери режим и запусти подборку'}
+                </span>
+            </div>
 
             <form
                 onSubmit={generate}
@@ -395,7 +469,7 @@ export function AiDjPanel({
             >
                 <div className="ai-dj-label-row">
                     <label htmlFor="ai-dj-prompt">
-                        Какая музыка нужна?
+                        Что будем слушать?
                     </label>
 
                     <span className="ai-dj-counter">
@@ -409,7 +483,7 @@ export function AiDjPanel({
                     maxLength={500}
                     rows={3}
                     placeholder={
-                        'Например: энергичный synthwave ' +
+                        'Например: атмосферный synthwave ' +
                         'для ночной поездки'
                     }
                     aria-invalid={
@@ -424,7 +498,7 @@ export function AiDjPanel({
 
                 <div className="ai-dj-actions">
                     <button
-                        className="button-primary"
+                        className="button-primary ai-dj-primary"
                         type="submit"
                         disabled={
                             locked ||
@@ -432,7 +506,8 @@ export function AiDjPanel({
                             !promptIsValid
                         }
                     >
-                        Создать плейлист
+                        <span aria-hidden="true">✦</span>
+                        Подобрать музыку
                     </button>
 
                     <button
@@ -446,16 +521,21 @@ export function AiDjPanel({
                         }
                         onClick={() => void run('more')}
                     >
-                        Ещё 15
+                        <span aria-hidden="true">↻</span>
+                        Продолжить подборку
                     </button>
 
                     <button
                         className="button-secondary"
                         type="button"
-                        disabled={locked || !queueHasRoom}
+                        disabled={
+                            locked ||
+                            !queueHasRoom
+                        }
                         onClick={() => void run('random')}
                     >
-                        Фулл рандом
+                        <span aria-hidden="true">✧</span>
+                        Случайная музыка
                     </button>
 
                     <button
@@ -468,18 +548,22 @@ export function AiDjPanel({
                         }
                         onClick={() => void run('similar')}
                     >
-                        Похожие треки
+                        <span aria-hidden="true">♫</span>
+                        Найти похожее
                     </button>
                 </div>
             </form>
 
             {context?.canGenerateMore && (
-                <p className="ai-dj-context">
-                    Контекст сохранён
-                    {context.prompt
-                        ? `: ${context.prompt}`
-                        : '. Можно запросить ещё 15.'}
-                </p>
+                <div className="ai-dj-context">
+                    <span className="ai-dj-context-dot" />
+
+                    <span>
+                        {context.prompt
+                            ? `Текущая подборка: ${context.prompt}`
+                            : 'Контекст сохранён. Можно продолжить подборку.'}
+                    </span>
+                </div>
             )}
 
             {maxPendingItems !== null && (
@@ -487,7 +571,7 @@ export function AiDjPanel({
                     В очереди: {currentCount} из {maxPendingItems}.
                     {availableSlots !== null &&
                     availableSlots < batchSize
-                        ? ' Для новой подборки нужно минимум 15 свободных мест.'
+                        ? ' Для новой подборки нужно 15 свободных мест.'
                         : ''}
                 </p>
             )}
@@ -495,7 +579,7 @@ export function AiDjPanel({
             {contextError && (
                 <div className="ai-dj-context-error">
                     <span>
-                        Не удалось обновить AI-контекст:
+                        Не удалось загрузить AI-контекст:
                         {' '}
                         {contextError}
                     </span>
@@ -503,26 +587,14 @@ export function AiDjPanel({
                     <button
                         type="button"
                         className="text-action"
-                        disabled={contextLoading || locked}
+                        disabled={
+                            contextLoading ||
+                            locked
+                        }
                         onClick={reloadContext}
                     >
                         Повторить
                     </button>
-                </div>
-            )}
-
-            {activeAction && (
-                <div
-                    className="ai-dj-progress"
-                    role="status"
-                    aria-live="polite"
-                >
-                    <span
-                        className="ai-dj-spinner"
-                        aria-hidden="true"
-                    />
-
-                    ИИ-диджей подбирает музыку…
                 </div>
             )}
 
@@ -536,32 +608,36 @@ export function AiDjPanel({
             )}
 
             {result && (
-                <div
-                    className="ai-dj-result"
-                    role="status"
-                >
+                <div className="ai-dj-result">
+                    <span className="ai-dj-result-kicker">
+                        ПОДБОРКА ГОТОВА
+                    </span>
+
                     <h3>
-                        Подборка добавлена в очередь
+                        {actionTitles[result.action]}
                     </h3>
 
                     <p>
-                        Новые композиции уже доступны
-                        всем участникам комнаты.
+                        {result.tracks.length > 0
+                            ? `Треков в подборке: ${result.tracks.length}. Очередь обновлена.`
+                            : 'Очередь обновлена.'}
                     </p>
 
-                    <ol>
-                        {result.tracks.map((item) => (
-                            <li key={item.id}>
-                                <span>
-                                    {item.track.title}
-                                </span>
+                    {result.tracks.length > 0 && (
+                        <ol>
+                            {result.tracks.map((item) => (
+                                <li key={item.id}>
+                                    <span>
+                                        {item.track.title}
+                                    </span>
 
-                                <small>
-                                    {item.track.artists.join(', ')}
-                                </small>
-                            </li>
-                        ))}
-                    </ol>
+                                    <small>
+                                        {item.track.artists.join(', ')}
+                                    </small>
+                                </li>
+                            ))}
+                        </ol>
+                    )}
                 </div>
             )}
         </section>

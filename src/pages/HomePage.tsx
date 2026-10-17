@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+
 import { VibyBrand } from '../components/VibyBrand'
+import { HomeSoundVisual } from '../components/HomeSoundVisual'
 
 function getInvitationCode(value: string): string | null {
     const input = value.trim()
@@ -65,8 +67,8 @@ export function HomePage() {
                 <VibyBrand />
 
                 <span className="site-header-caption">
-          Музыка объединяет
-        </span>
+                    Музыка объединяет
+                </span>
             </header>
 
             <main className="home-layout">
@@ -96,12 +98,7 @@ export function HomePage() {
                 </section>
 
                 <aside className="home-side">
-                    <div className="home-logo-panel">
-                        <img
-                            src="/vibyroom-logo.png"
-                            alt="Логотип VibyRoom"
-                        />
-                    </div>
+                    <HomeSoundVisual />
 
                     <form
                         className="home-join-panel"

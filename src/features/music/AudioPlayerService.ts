@@ -13,6 +13,7 @@ export interface LocalAudioState {
     positionSeconds: number
     durationSeconds: number | null
     error: string | null
+    muted: boolean
 }
 
 type AudioStateListener = (
@@ -187,6 +188,8 @@ export class AudioPlayerService {
                     : null,
 
             error: this.error,
+
+            muted: this.audio.muted,
         }
     }
 
@@ -200,6 +203,15 @@ export class AudioPlayerService {
 
     isPaused(): boolean {
         return this.audio.paused
+    }
+
+    setMuted(muted: boolean): void {
+        if (this.disposed) {
+            return
+        }
+
+        this.audio.muted = muted
+        this.notify()
     }
 
     setPlaybackRate(rate: number): void {
@@ -356,7 +368,7 @@ export class AudioPlayerService {
             ) {
                 throw new Error(
                     'Браузер заблокировал автозапуск. ' +
-                    'Нажмите «Начать прослушивание».',
+                    'Нажмите кнопку Power для включения прослушивания.',
                     { cause: error },
                 )
             }

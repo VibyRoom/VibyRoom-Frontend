@@ -1,75 +1,167 @@
+/* ======================================
+   Room layout
+   ====================================== */
+
+.room-layout-ai {
+    align-items: start;
+}
+
+.room-layout-ai > .participants-panel {
+    min-width: 0;
+    min-height: 0;
+    align-self: start;
+}
+
+.room-layout-ai .room-main {
+    min-width: 0;
+}
+
+.room-layout-ai .room-top-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+}
+
+.room-layout-ai .room-top-row:not(.room-top-row--with-ai) {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.room-layout-ai .room-top-row > .music-player,
+.room-layout-ai .room-top-row > .ai-dj {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    align-self: start;
+    margin: 0;
+}
+
+.room-layout-ai .room-top-row .music-player-body {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    align-items: start;
+    gap: 18px;
+}
+
+.room-layout-ai .room-top-row .music-player-cover {
+    width: 100%;
+    max-width: 100%;
+}
+
+.room-layout-ai .room-top-row .music-player-details {
+    min-width: 0;
+}
+
+.room-layout-ai .music-library {
+    width: 100%;
+    min-width: 0;
+}
+
+/* ======================================
+   AI DJ panel
+   ====================================== */
+
 .ai-dj {
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    min-width: 0;
     padding: 22px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
 }
 
-.ai-dj-heading,
-.ai-dj-label-row {
+.ai-dj-heading {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 12px;
 }
 
 .ai-dj-heading h2 {
-    margin-top: 5px;
-    font-size: 22px;
+    margin-top: 6px;
+    font-size: 23px;
+    letter-spacing: -0.035em;
 }
 
 .ai-dj-owner {
+    flex: none;
     padding: 7px 10px;
+
     background: var(--accent-muted);
     border: 1px solid #58416b;
     border-radius: 7px;
+
     color: var(--accent-hover);
     font-size: 11px;
     font-weight: 600;
 }
 
-.ai-dj-description,
-.ai-dj-capacity,
-.ai-dj-context {
+.ai-dj-description {
     color: var(--text-secondary);
     font-size: 13px;
-    line-height: 1.6;
-}
-
-.ai-dj-context {
-    color: var(--accent-hover);
-    overflow-wrap: anywhere;
+    line-height: 1.7;
 }
 
 .ai-dj-form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 13px;
+}
+
+.ai-dj-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.ai-dj-label-row label {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .ai-dj-counter {
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
 }
 
 .ai-dj textarea {
     display: block;
+
     width: 100%;
-    min-height: 95px;
-    resize: vertical;
+    min-width: 0;
+    min-height: 100px;
     padding: 12px;
+
+    resize: vertical;
+
     background: var(--input-bg);
-    color: var(--text);
     border: 1px solid var(--border-strong);
     border-radius: 9px;
-    font: inherit;
+
+    color: var(--text);
+    font-family: inherit;
     font-size: 13px;
     line-height: 1.6;
+
+    outline: none;
+}
+
+.ai-dj textarea::placeholder {
+    color: var(--muted);
 }
 
 .ai-dj textarea:focus {
     border-color: var(--accent);
-    outline: none;
 }
 
 .ai-dj textarea:focus-visible {
@@ -88,66 +180,470 @@
 }
 
 .ai-dj-actions button {
+    justify-content: center;
+
     width: 100%;
     min-width: 0;
+    min-height: 42px;
+
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.ai-dj-progress {
-    display: flex;
+.ai-dj-actions button span {
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: var(--accent-muted);
-    border: 1px solid #58416b;
-    border-radius: 9px;
-    color: var(--text);
+    justify-content: center;
+
+    flex: none;
+    width: 18px;
+    font-size: 16px;
+}
+
+.ai-dj-actions .ai-dj-primary {
     font-size: 13px;
 }
 
-.ai-dj-spinner {
-    width: 18px;
-    height: 18px;
-    flex: none;
-    border: 2px solid #58416b;
-    border-top-color: var(--accent-hover);
-    border-radius: 50%;
-    animation: ai-dj-spin 800ms linear infinite;
+.ai-dj-context {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
 }
 
-@keyframes ai-dj-spin {
-    to {
-        transform: rotate(360deg);
+.ai-dj-context-dot {
+    display: block;
+    flex: none;
+
+    width: 7px;
+    height: 7px;
+    margin-top: 6px;
+
+    background: var(--green);
+    border-radius: 50%;
+}
+
+.ai-dj-capacity {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.ai-dj-context-error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--red);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* ======================================
+   Always-visible generation visual
+   ====================================== */
+
+.ai-dj-generation {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    width: 100%;
+    height: 290px;
+    min-height: 290px;
+    padding: 18px 12px;
+
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+
+    text-align: center;
+
+    transition:
+            background-color 260ms ease,
+            border-color 260ms ease;
+}
+
+.ai-dj-generation.is-active {
+    background: var(--accent-muted);
+    border-color: #704686;
+}
+
+.ai-dj-generation strong {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.ai-dj-generation p {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.ai-dj-generation-note {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.ai-dj-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    flex: none;
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+.ai-dj-orbit {
+    position: relative;
+
+    width: 150px;
+    height: 130px;
+    margin: 0 auto;
+}
+
+.ai-dj-orbit-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    display: block;
+
+    border: 1px solid #41495b;
+    border-radius: 50%;
+
+    transform: translate(-50%, -50%);
+}
+
+.ai-dj-orbit-ring.ring-one {
+    width: 78px;
+    height: 78px;
+}
+
+.ai-dj-orbit-ring.ring-two {
+    width: 112px;
+    height: 112px;
+}
+
+.ai-dj-orbit-ring.ring-three {
+    width: 145px;
+    height: 120px;
+}
+
+.ai-dj-orbit-core {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 62px;
+    height: 62px;
+
+    background: #32394b;
+    border: 1px solid #59637a;
+    border-radius: 50%;
+
+    color: var(--text-secondary);
+    font-size: 27px;
+
+    transform: translate(-50%, -50%);
+
+    transition:
+            background-color 260ms ease,
+            border-color 260ms ease,
+            color 260ms ease,
+            box-shadow 260ms ease;
+}
+
+.ai-dj-particle {
+    position: absolute;
+    z-index: 3;
+
+    display: block;
+
+    width: 5px;
+    height: 5px;
+
+    background: #727b94;
+    border-radius: 50%;
+    opacity: 0.45;
+}
+
+.ai-dj-particle.particle-one {
+    top: 14px;
+    left: 30px;
+}
+
+.ai-dj-particle.particle-two {
+    top: 30px;
+    right: 9px;
+    width: 4px;
+    height: 4px;
+}
+
+.ai-dj-particle.particle-three {
+    bottom: 20px;
+    left: 8px;
+}
+
+.ai-dj-particle.particle-four {
+    bottom: 7px;
+    right: 35px;
+    width: 4px;
+    height: 4px;
+}
+
+.ai-dj-particle.particle-five {
+    top: 9px;
+    right: 51px;
+    width: 3px;
+    height: 3px;
+}
+
+.ai-dj-particle.particle-six {
+    bottom: 34px;
+    right: 8px;
+    width: 3px;
+    height: 3px;
+}
+
+.ai-dj-equalizer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+
+    height: 24px;
+}
+
+.ai-dj-equalizer span {
+    display: block;
+
+    width: 4px;
+    height: 12px;
+
+    background: #69748a;
+    border-radius: 3px;
+
+    transform-origin: bottom center;
+}
+
+/* ======================================
+   Animated state
+   ====================================== */
+
+.ai-dj-generation.is-active .ai-dj-orbit-ring {
+    border-color: rgba(204, 98, 231, 0.4);
+}
+
+.ai-dj-generation.is-active .ring-one {
+    animation: ai-dj-ring-pulse 2.5s ease-in-out infinite;
+}
+
+.ai-dj-generation.is-active .ring-two {
+    animation: ai-dj-ring-pulse 3.1s ease-in-out infinite;
+    animation-delay: -1s;
+}
+
+.ai-dj-generation.is-active .ring-three {
+    animation: ai-dj-ring-pulse 3.7s ease-in-out infinite;
+    animation-delay: -1.8s;
+}
+
+.ai-dj-generation.is-active .ai-dj-orbit-core {
+    background: #7f319e;
+    border-color: #d381ed;
+    color: #fff;
+
+    box-shadow:
+            0 0 22px rgba(187, 80, 218, 0.4),
+            0 0 45px rgba(187, 80, 218, 0.2);
+
+    animation: ai-dj-core-pulse 2.4s ease-in-out infinite;
+}
+
+.ai-dj-generation.is-active .ai-dj-particle {
+    background: var(--accent-hover);
+    opacity: 1;
+
+    box-shadow: 0 0 10px rgba(204, 98, 231, 0.7);
+
+    animation: ai-dj-particle-float 3s ease-in-out infinite;
+}
+
+.ai-dj-generation.is-active .particle-one {
+    animation-delay: -0.3s;
+}
+
+.ai-dj-generation.is-active .particle-two {
+    animation-delay: -1.1s;
+}
+
+.ai-dj-generation.is-active .particle-three {
+    animation-delay: -1.8s;
+}
+
+.ai-dj-generation.is-active .particle-four {
+    animation-delay: -0.8s;
+}
+
+.ai-dj-generation.is-active .particle-five {
+    animation-delay: -2.2s;
+}
+
+.ai-dj-generation.is-active .particle-six {
+    animation-delay: -1.5s;
+}
+
+.ai-dj-generation.is-active .ai-dj-equalizer span {
+    height: 22px;
+    background: var(--accent-hover);
+
+    animation: ai-dj-equalize 900ms ease-in-out infinite alternate;
+}
+
+.ai-dj-generation.is-active .ai-dj-equalizer span:nth-child(1) {
+    animation-delay: -0.2s;
+}
+
+.ai-dj-generation.is-active .ai-dj-equalizer span:nth-child(2) {
+    animation-delay: -0.6s;
+}
+
+.ai-dj-generation.is-active .ai-dj-equalizer span:nth-child(3) {
+    animation-delay: -0.35s;
+}
+
+.ai-dj-generation.is-active .ai-dj-equalizer span:nth-child(4) {
+    animation-delay: -0.8s;
+}
+
+.ai-dj-generation.is-active .ai-dj-equalizer span:nth-child(5) {
+    animation-delay: -0.45s;
+}
+
+.ai-dj-generation.is-active .ai-dj-equalizer span:nth-child(6) {
+    animation-delay: -0.1s;
+}
+
+.ai-dj-generation.is-active .ai-dj-equalizer span:nth-child(7) {
+    animation-delay: -0.7s;
+}
+
+@keyframes ai-dj-core-pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(0.94);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.08);
     }
 }
 
+@keyframes ai-dj-ring-pulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(0.94);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.06);
+    }
+}
+
+@keyframes ai-dj-particle-float {
+    0%, 100% {
+        opacity: 0.35;
+        transform: translateY(5px) scale(0.85);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(-7px) scale(1.2);
+    }
+}
+
+@keyframes ai-dj-equalize {
+    0% {
+        transform: scaleY(0.25);
+        opacity: 0.55;
+    }
+
+    100% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+/* ======================================
+   Result panel
+   ====================================== */
+
 .ai-dj-result {
     padding: 16px;
+
     background: var(--surface-raised);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     border-radius: 10px;
 }
 
+.ai-dj-result-kicker {
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
 .ai-dj-result h3 {
+    margin-top: 7px;
     font-size: 15px;
 }
 
 .ai-dj-result p {
-    margin: 5px 0 10px;
+    margin-top: 8px;
     color: var(--text-secondary);
     font-size: 12px;
+    line-height: 1.6;
 }
 
 .ai-dj-result ol {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 18px;
+    gap: 10px 20px;
+
+    margin: 13px 0 0;
     padding-left: 22px;
-    margin: 0;
-    font-size: 12px;
+
+    max-height: 240px;
+    overflow-y: auto;
 }
 
 .ai-dj-result li {
     padding-left: 2px;
+    color: var(--text);
+    font-size: 12px;
     overflow-wrap: anywhere;
 }
 
@@ -155,18 +651,117 @@
     display: block;
     margin-top: 3px;
     color: var(--muted);
+    font-size: 11px;
 }
 
-.ai-dj-context-error {
+/* ======================================
+   Covers in queue and search
+   ====================================== */
+
+.room-layout-ai .music-queue-item {
+    grid-template-columns:
+        28px
+        44px
+        minmax(0, 1fr)
+        60px
+        auto;
+}
+
+.room-layout-ai .music-track-artwork {
+    position: relative;
+
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    color: var(--red);
-    font-size: 12px;
+    justify-content: center;
+
+    flex: none;
+    width: 44px;
+    height: 44px;
+
+    overflow: hidden;
+
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.room-layout-ai .music-track-artwork img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.room-layout-ai .music-track-artwork-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+
+    color: var(--muted);
+    font-size: 22px;
+}
+
+.room-layout-ai .music-search-artwork {
+    width: 45px;
+    height: 45px;
+}
+
+/* ======================================
+   Responsive
+   ====================================== */
+
+@media (max-width: 1100px) {
+    .room-layout-ai .room-top-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .room-layout-ai .room-top-row .music-player-body {
+        grid-template-columns: 170px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 760px) {
+    .room-layout-ai {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .room-layout-ai > .participants-panel {
+        min-height: 0;
+    }
+
+    .room-layout-ai .room-top-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .room-layout-ai .room-top-row .music-player-body {
+        grid-template-columns: 180px minmax(0, 1fr);
+    }
 }
 
 @media (max-width: 560px) {
+    .room-layout-ai .room-top-row .music-player-body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .room-layout-ai .music-queue-item {
+        grid-template-columns:
+            20px
+            40px
+            minmax(0, 1fr)
+            auto;
+
+        gap: 10px;
+        padding: 13px;
+    }
+
+    .room-layout-ai .music-queue-artwork {
+        width: 40px;
+        height: 40px;
+    }
+
     .ai-dj {
         padding: 17px;
     }
@@ -175,14 +770,55 @@
         font-size: 10px;
     }
 
+    .ai-dj-generation {
+        height: 280px;
+        min-height: 280px;
+    }
+
     .ai-dj-actions,
     .ai-dj-result ol {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .ai-dj-spinner {
+    .ai-dj-generation.is-active .ai-dj-orbit-ring,
+    .ai-dj-generation.is-active .ai-dj-orbit-core,
+    .ai-dj-generation.is-active .ai-dj-particle,
+    .ai-dj-generation.is-active .ai-dj-equalizer span {
         animation: none;
     }
+}
+
+/* ======================================
+   Final player layout
+   ====================================== */
+
+/* Обе панели занимают одинаковую высоту */
+.room-layout-ai .room-top-row {
+    align-items: stretch;
+}
+
+.room-layout-ai .room-top-row > .music-player,
+.room-layout-ai .room-top-row > .ai-dj {
+    height: auto;
+    align-self: stretch;
+}
+
+/* Плеер заполняет высоту AI DJ */
+.room-layout-ai .room-top-row > .music-player {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Обложка, прогресс и кнопки
+   располагаются по центру оставшегося места */
+.room-layout-ai .room-top-row .music-player-body {
+    flex: 1;
+    align-items: center;
+}
+
+/* Убираем вертикальный разделитель кнопок */
+.room-layout-ai .music-controls-divider {
+    display: none;
 }

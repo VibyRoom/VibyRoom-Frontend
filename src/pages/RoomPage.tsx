@@ -15,7 +15,10 @@ import {
 } from '../features/presence/roomRealtime'
 
 import { roomsApi } from '../features/rooms/roomsApi'
-import type { RoomDetails, RoomMember } from '../features/rooms/types'
+import type {
+    RoomDetails,
+    RoomMember,
+} from '../features/rooms/types'
 
 import { useRoomMusic } from '../features/music/useRoomMusic'
 import { PlayerControls } from '../features/music/PlayerControls'
@@ -62,8 +65,11 @@ export function RoomPage() {
         stopListening,
     } = music
 
-    const [room, setRoom] = useState<RoomDetails | null>(null)
-    const [guestId, setGuestId] = useState<string | null>(null)
+    const [room, setRoom] =
+        useState<RoomDetails | null>(null)
+
+    const [guestId, setGuestId] =
+        useState<string | null>(null)
 
     const [onlineGuests, setOnlineGuests] =
         useState<Set<string>>(new Set())
@@ -188,8 +194,6 @@ export function RoomPage() {
                 setRoom(details)
                 setLoading(false)
 
-                // REST сначала восстанавливает состояние,
-                // SignalR затем приносит изменения.
                 void refreshMusic()
 
                 realtime = new RoomRealtime(roomId, {
@@ -229,7 +233,6 @@ export function RoomPage() {
                         if (state !== 'connected') {
                             setOnlineGuests(new Set())
                         } else {
-                            // После reconnect REST обязателен.
                             void refreshMusic()
                             void reloadRoom()
                         }
@@ -292,7 +295,10 @@ export function RoomPage() {
         action: () => Promise<void>,
         refreshRoom = false,
     ): Promise<boolean> {
-        if (operationInProgress.current || terminalState) {
+        if (
+            operationInProgress.current ||
+            terminalState
+        ) {
             return false
         }
 
@@ -399,7 +405,7 @@ export function RoomPage() {
         setLoading(true)
         setConnectionState('connecting')
         setError('')
-        setRetryVersion((version) => version + 1)
+        setRetryVersion((value) => value + 1)
     }
 
     if (terminalState) {
@@ -426,6 +432,7 @@ export function RoomPage() {
             <main className="page narrow">
                 <div className="panel stack terminal-panel">
                     <span className="eyebrow">VibyRoom</span>
+
                     <h1>{message.title}</h1>
 
                     <p className="muted-text">
@@ -615,7 +622,7 @@ export function RoomPage() {
                 </div>
             </header>
 
-            <div className="room-layout">
+            <div className="room-layout room-layout-ai">
                 <aside
                     className="panel participants-panel"
                     aria-label="Участники комнаты"
@@ -637,7 +644,9 @@ export function RoomPage() {
                     <div className="presence-summary">
                         <span
                             className={
-                                `status-dot ${connected ? 'online' : ''}`
+                                `status-dot ${
+                                    connected ? 'online' : ''
+                                }`
                             }
                             aria-hidden="true"
                         />
@@ -651,7 +660,8 @@ export function RoomPage() {
 
                     <ul className="participants-list">
                         {room.members.map((member) => {
-                            const isMe = member.guestId === guestId
+                            const isMe =
+                                member.guestId === guestId
 
                             const isOnline =
                                 connected &&
@@ -665,7 +675,11 @@ export function RoomPage() {
                                     <div className="participant-top">
                                         <span
                                             className={
-                                                `status-dot ${isOnline ? 'online' : ''}`
+                                                `status-dot ${
+                                                    isOnline
+                                                        ? 'online'
+                                                        : ''
+                                                }`
                                             }
                                             aria-hidden="true"
                                         />
@@ -759,70 +773,90 @@ export function RoomPage() {
                 </aside>
 
                 <main className="room-main">
-                    <div className="room-notices">
-                        <div
-                            className="connection-indicator"
-                            role="status"
-                        >
-                            <span
-                                className={
-                                    `status-dot ${connected ? 'online' : ''}`
-                                }
-                                aria-hidden="true"
-                            />
-
-                            <span>
-                                {connectionLabels[connectionState]}
-                            </span>
-
-                            {connectionState === 'disconnected' && (
-                                <button
-                                    type="button"
-                                    className="text-action"
-                                    disabled={busy}
-                                    onClick={retryConnection}
+                    {(connectionState !== 'connected' || error) && (
+                        <div className="room-notices">
+                            {connectionState !== 'connected' && (
+                                <div
+                                    className="connection-indicator"
+                                    role="status"
                                 >
-                                    Подключиться снова
-                                </button>
+                                    <span
+                                        className="status-dot"
+                                        aria-hidden="true"
+                                    />
+
+                                    <span>
+                                        {connectionLabels[connectionState]}
+                                    </span>
+
+                                    {connectionState === 'disconnected' && (
+                                        <button
+                                            type="button"
+                                            className="text-action"
+                                            disabled={busy}
+                                            onClick={retryConnection}
+                                        >
+                                            Подключиться снова
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {error && (
+                                <div
+                                    className="room-error"
+                                    role="alert"
+                                >
+                                    {error}
+                                </div>
                             )}
                         </div>
+                    )}
 
-                        {error && (
-                            <div className="room-error" role="alert">
-                                {error}
-                            </div>
+                    <div
+                        className={
+                            `room-top-row ${
+                                isOwner
+                                    ? 'room-top-row--with-ai'
+                                    : ''
+                            }`
+                        }
+                    >
+                        <PlayerControls
+                            playback={
+                                music.musicState?.playback ?? null
+                            }
+                            pendingCount={
+                                music.musicState?.queue.length ?? 0
+                            }
+                            positionMs={music.positionMs}
+                            localAudio={music.localAudio}
+                            listening={music.listening}
+                            isOwner={isOwner}
+                            busy={music.musicBusy}
+                            error={music.musicError}
+                            onStartListening={music.startListening}
+                            onStopListening={music.stopListening}
+                            onToggleMute={music.toggleMute}
+                            onRetryAudio={music.retryAudio}
+                            onPlayPause={() => {
+                                void music.playPause()
+                            }}
+                            onSkip={() => {
+                                void music.skip()
+                            }}
+                            onSeek={(positionMs) => {
+                                void music.seek(positionMs)
+                            }}
+                        />
+
+                        {isOwner && (
+                            <AiDjPanel
+                                roomId={roomId}
+                                music={music}
+                            />
                         )}
                     </div>
-
-                    <PlayerControls
-                        playback={music.musicState?.playback ?? null}
-                        pendingCount={music.musicState?.queue.length ?? 0}
-                        positionMs={music.positionMs}
-                        localAudio={music.localAudio}
-                        listening={music.listening}
-                        isOwner={isOwner}
-                        busy={music.musicBusy}
-                        error={music.musicError}
-                        onStartListening={music.startListening}
-                        onStopListening={music.stopListening}
-                        onRetryAudio={music.retryAudio}
-                        onPlayPause={() => {
-                            void music.playPause()
-                        }}
-                        onSkip={() => {
-                            void music.skip()
-                        }}
-                        onSeek={(positionMs) => {
-                            void music.seek(positionMs)
-                        }}
-                    />
-
-                    {isOwner && (
-                        <AiDjPanel
-                            roomId={roomId}
-                            music={music}
-                        />
-                    )}
 
                     <MusicQueuePanel
                         music={music}
