@@ -20,6 +20,7 @@ import type { RoomDetails, RoomMember } from '../features/rooms/types'
 import { useRoomMusic } from '../features/music/useRoomMusic'
 import { PlayerControls } from '../features/music/PlayerControls'
 import { MusicQueuePanel } from '../features/music/MusicQueuePanel'
+import { AiDjPanel } from '../features/music/AiDjPanel'
 
 import {
     ApiError,
@@ -815,6 +816,13 @@ export function RoomPage() {
                             void music.seek(positionMs)
                         }}
                     />
+
+                    {isOwner && (
+                        <AiDjPanel
+                            roomId={roomId}
+                            music={music}
+                        />
+                    )}
 
                     <MusicQueuePanel
                         music={music}
